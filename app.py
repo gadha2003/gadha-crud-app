@@ -11,7 +11,7 @@ app = Flask(__name__)
 DB_HOST = "gadha-postgres-server.postgres.database.azure.com"
 DB_NAME = "cruddb"
 DB_USER = "gadhaadmin@gadha-postgres-server"
-DB_PASS = "X9@Secure2026!"
+DB_PASS = "Secure1234!"
 
 def get_connection():
     return psycopg2.connect(
@@ -95,3 +95,4 @@ def add():
 
 if __name__ == "__main__":
     app.run()
+
