@@ -6,7 +6,7 @@ app = Flask(__name__)
 DB_HOST = "gadha-postgres-server.postgres.database.azure.com"
 DB_NAME = "cruddb"
 DB_USER = "gadhaadmin"
-DB_PASS = "PASS"
+DB_PASS = "Security123"
 
 def get_connection():
     return psycopg2.connect(
