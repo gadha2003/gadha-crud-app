@@ -24,97 +24,9 @@ def get_connection():
 
 @app.route("/")
 def home():
-    conn = get_connection()
-    cur = conn.cursor()
-
-    cur.execute("""
-        CREATE TABLE IF NOT EXISTS students (
-            id SERIAL PRIMARY KEY,
-            name VARCHAR(100)
-        );
-    """)
-    conn.commit()
-
-    cur.execute("SELECT * FROM students ORDER BY id;")
-    students = cur.fetchall()
-
-    cur.close()
-    conn.close()
-
-    return render_template("index.html", students=students)
-
-# ======================
-# CREATE
-# ======================
-
-@app.route("/add", methods=["POST"])
-def add():
-    name = request.form["name"]
-
-    conn = get_connection()
-    cur = conn.cursor()
-
-    cur.execute("INSERT INTO students (name) VALUES (%s);", (name,))
-    conn.commit()
-
-    cur.close()
-    conn.close()
-
-    return redirect("/")
-
-# ======================
-# DELETE
-# ======================
-
-@app.route("/delete/<int:id>")
-def delete(id):
-    conn = get_connection()
-    cur = conn.cursor()
-
-    cur.execute("DELETE FROM students WHERE id = %s;", (id,))
-    conn.commit()
-
-    cur.close()
-    conn.close()
-
-    return redirect("/")
-
-# ======================
-# EDIT PAGE
-# ======================
-
-@app.route("/edit/<int:id>")
-def edit(id):
-    conn = get_connection()
-    cur = conn.cursor()
-
-    cur.execute("SELECT * FROM students WHERE id = %s;", (id,))
-    student = cur.fetchone()
-
-    cur.close()
-    conn.close()
-
-    return render_template("edit.html", student=student)
-
-# ======================
-# UPDATE
-# ======================
-
-@app.route("/update/<int:id>", methods=["POST"])
-def update(id):
-    name = request.form["name"]
-
-    conn = get_connection()
-    cur = conn.cursor()
-
-    cur.execute("UPDATE students SET name = %s WHERE id = %s;", (name, id))
-    conn.commit()
-
-    cur.close()
-    conn.close()
-
-    return redirect("/")
+    return "App is running successfully!"
 
 
 if __name__ == "__main__":
     app.run()
+
