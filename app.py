@@ -24,9 +24,19 @@ def get_connection():
 
 @app.route("/")
 def home():
-    return "App is running successfully!"
+    try:
+        conn = get_connection()
+        cur = conn.cursor()
+        cur.execute("SELECT 1;")
+        result = cur.fetchone()
+        cur.close()
+        conn.close()
+        return f"DB Connected Successfully! Result: {result}"
+    except Exception as e:
+        return f"Database Error: {e}"
 
 
 if __name__ == "__main__":
     app.run()
+
 
