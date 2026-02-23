@@ -1,13 +1,9 @@
-from flask import Flask, request, render_template_string
+from flask import Flask, request, render_template, redirect
 import psycopg2
-import os
 
 app = Flask(__name__)
 
-# ==========================
-# Azure PostgreSQL Settings
-# ==========================
-
+# Database Config (Flexible Server)
 DB_HOST = "gadha-postgres-server.postgres.database.azure.com"
 DB_NAME = "cruddb"
 DB_USER = "gadhaadmin"
@@ -22,78 +18,103 @@ def get_connection():
         sslmode="require"
     )
 
-# ==========================
-# Home Route
-# ==========================
+# ======================
+# HOME - READ
+# ======================
 
 @app.route("/")
 def home():
-    try:
-        conn = get_connection()
-        cur = conn.cursor()
+    conn = get_connection()
+    cur = conn.cursor()
 
-        cur.execute("""
-            CREATE TABLE IF NOT EXISTS students (
-                id SERIAL PRIMARY KEY,
-                name VARCHAR(100)
-            );
-        """)
-        conn.commit()
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS students (
+            id SERIAL PRIMARY KEY,
+            name VARCHAR(100)
+        );
+    """)
+    conn.commit()
 
-        cur.execute("SELECT * FROM students;")
-        students = cur.fetchall()
+    cur.execute("SELECT * FROM students ORDER BY id;")
+    students = cur.fetchall()
 
-        cur.close()
-        conn.close()
+    cur.close()
+    conn.close()
 
-    except Exception as e:
-        return f"<h3>Database Error:</h3><pre>{e}</pre>"
+    return render_template("index.html", students=students)
 
-    html = """
-    <h2>Student CRUD App (Azure PostgreSQL)</h2>
-
-    <form method="POST" action="/add">
-        <input type="text" name="name" placeholder="Enter name" required>
-        <button type="submit">Add</button>
-    </form>
-
-    <ul>
-    {% for student in students %}
-        <li>{{student[1]}}</li>
-    {% endfor %}
-    </ul>
-    """
-
-    return render_template_string(html, students=students)
-
-# ==========================
-# Add Route
-# ==========================
+# ======================
+# CREATE
+# ======================
 
 @app.route("/add", methods=["POST"])
 def add():
     name = request.form["name"]
 
-    try:
-        conn = get_connection()
-        cur = conn.cursor()
+    conn = get_connection()
+    cur = conn.cursor()
 
-        cur.execute("INSERT INTO students (name) VALUES (%s);", (name,))
-        conn.commit()
+    cur.execute("INSERT INTO students (name) VALUES (%s);", (name,))
+    conn.commit()
 
-        cur.close()
-        conn.close()
+    cur.close()
+    conn.close()
 
-    except Exception as e:
-        return f"<h3>Insert Error:</h3><pre>{e}</pre>"
+    return redirect("/")
 
-    return home()
+# ======================
+# DELETE
+# ======================
 
-# ==========================
-# Main
-# ==========================
+@app.route("/delete/<int:id>")
+def delete(id):
+    conn = get_connection()
+    cur = conn.cursor()
+
+    cur.execute("DELETE FROM students WHERE id = %s;", (id,))
+    conn.commit()
+
+    cur.close()
+    conn.close()
+
+    return redirect("/")
+
+# ======================
+# EDIT PAGE
+# ======================
+
+@app.route("/edit/<int:id>")
+def edit(id):
+    conn = get_connection()
+    cur = conn.cursor()
+
+    cur.execute("SELECT * FROM students WHERE id = %s;", (id,))
+    student = cur.fetchone()
+
+    cur.close()
+    conn.close()
+
+    return render_template("edit.html", student=student)
+
+# ======================
+# UPDATE
+# ======================
+
+@app.route("/update/<int:id>", methods=["POST"])
+def update(id):
+    name = request.form["name"]
+
+    conn = get_connection()
+    cur = conn.cursor()
+
+    cur.execute("UPDATE students SET name = %s WHERE id = %s;", (name, id))
+    conn.commit()
+
+    cur.close()
+    conn.close()
+
+    return redirect("/")
+
 
 if __name__ == "__main__":
     app.run()
-
-
